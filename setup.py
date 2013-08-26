@@ -19,12 +19,12 @@ import distutils.core
 version = "0.1"
 
 distutils.core.setup(
-    name="torndb",
+    name="torndbpg",
     version=version,
-    py_modules=["torndb"],
-    author="Facebook",
-    author_email="python-tornado@googlegroups.com",
-    url="https://github.com/bdarnell/torndb",
+    py_modules=["torndbpg"],
+    author="Pims",
+    author_email="tim@fewagainstmany.com",
+    url="https://github.com/pims/torndbpg",
     license="http://www.apache.org/licenses/LICENSE-2.0",
-    description="A lightweight wrapper around MySQLdb.  Originally part of the Tornado framework.",
+    description="A lightweight wrapper around Postgres. Fully compatible with the Torndb (MySQL) originally part of the Tornado framework.",
     )
