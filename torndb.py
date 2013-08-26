@@ -31,11 +31,8 @@ import time
 
 try:
     import psycopg2
-    # import MySQLdb.constants
-    # import MySQLdb.converters
-    # import MySQLdb.cursors
 except ImportError:
-    # If MySQLdb isn't available this module won't actually be useable,
+    # If psycopg2 isn't available this module won't actually be useable,
     # but we want it to at least be importable on readthedocs.org,
     # which has limitations on third-party modules.
     if 'READTHEDOCS' in os.environ:
@@ -47,7 +44,7 @@ version = "0.1"
 version_info = (0, 1, 0, 0)
 
 class Connection(object):
-    """A lightweight wrapper around MySQLdb DB-API connections.
+    """A lightweight wrapper around Postgres DB-API connections.
 
     The main value we provide is wrapping rows in a dict/object so that
     columns can be accessed by name. Typical usage::
