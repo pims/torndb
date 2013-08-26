@@ -30,15 +30,16 @@ import os
 import time
 
 try:
-    import MySQLdb.constants
-    import MySQLdb.converters
-    import MySQLdb.cursors
+    import psycopg2
+    # import MySQLdb.constants
+    # import MySQLdb.converters
+    # import MySQLdb.cursors
 except ImportError:
     # If MySQLdb isn't available this module won't actually be useable,
     # but we want it to at least be importable on readthedocs.org,
     # which has limitations on third-party modules.
     if 'READTHEDOCS' in os.environ:
-        MySQLdb = None
+        psycopg2 = None
     else:
         raise
 
@@ -68,13 +69,11 @@ class Connection(object):
         self.database = database
         self.max_idle_time = float(max_idle_time)
 
-        args = dict(conv=CONVERSIONS, use_unicode=True, charset="utf8",
-                    db=database, init_command=('SET time_zone = "%s"' % time_zone),
-                    connect_timeout=connect_timeout, sql_mode="TRADITIONAL")
+        args = dict(connect_timeout=connect_timeout)
         if user is not None:
             args["user"] = user
         if password is not None:
-            args["passwd"] = password
+            args["password"] = password
 
         # We accept a path to a MySQL socket file or a host(:port) string
         if "/" in host:
@@ -87,7 +86,7 @@ class Connection(object):
                 args["port"] = int(pair[1])
             else:
                 args["host"] = host
-                args["port"] = 3306
+                args["port"] = 5432
 
         self._db = None
         self._db_args = args
@@ -95,7 +94,7 @@ class Connection(object):
         try:
             self.reconnect()
         except Exception:
-            logging.error("Cannot connect to MySQL on %s", self.host,
+            logging.error("Cannot connect to Postgres on %s", self.host,
                           exc_info=True)
 
     def __del__(self):
@@ -108,15 +107,18 @@ class Connection(object):
             self._db = None
 
     def reconnect(self):
+
         """Closes the existing database connection and re-opens it."""
-        self.close()
-        self._db = MySQLdb.connect(**self._db_args)
-        self._db.autocommit(True)
+        # self.close()
+        dsn = "host='%s' dbname='%s' user='%s' password='%s'" %  (self._db_args['host'],
+                self.database, self._db_args['user'], self._db_args.get('password', ''))
+        self._db = psycopg2.connect(dsn)
+        self._db.autocommit = True
 
     def iter(self, query, *parameters, **kwparameters):
         """Returns an iterator for the given query and parameters."""
         self._ensure_connected()
-        cursor = MySQLdb.cursors.SSCursor(self._db)
+        cursor = self._db.cursor
         try:
             self._execute(cursor, query, parameters, kwparameters)
             column_names = [d[0] for d in cursor.description]
@@ -207,6 +209,8 @@ class Connection(object):
     insertmany = executemany_lastrowid
 
     def _ensure_connected(self):
+        return
+
         # Mysql by default closes client connections that are idle for
         # 8 hours, but the client library does not report this fact until
         # you try to perform a query and it fails.  Protect against this
@@ -238,19 +242,6 @@ class Row(dict):
         except KeyError:
             raise AttributeError(name)
 
-if MySQLdb is not None:
-    # Fix the access conversions to properly recognize unicode/binary
-    FIELD_TYPE = MySQLdb.constants.FIELD_TYPE
-    FLAG = MySQLdb.constants.FLAG
-    CONVERSIONS = copy.copy(MySQLdb.converters.conversions)
-
-    field_types = [FIELD_TYPE.BLOB, FIELD_TYPE.STRING, FIELD_TYPE.VAR_STRING]
-    if 'VARCHAR' in vars(FIELD_TYPE):
-        field_types.append(FIELD_TYPE.VARCHAR)
-
-    for field_type in field_types:
-        CONVERSIONS[field_type] = [(FLAG.BINARY, str)] + CONVERSIONS[field_type]
-
-    # Alias some common MySQL exceptions
-    IntegrityError = MySQLdb.IntegrityError
-    OperationalError = MySQLdb.OperationalError
+# Alias some common Postgres exceptions
+IntegrityError = psycopg2.IntegrityError
+OperationalError = psycopg2.OperationalError
