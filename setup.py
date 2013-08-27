@@ -21,7 +21,7 @@ version = "0.1"
 distutils.core.setup(
     name="torndbpg",
     version=version,
-    py_modules=["torndb"],
+    py_modules=["torndbpg"],
     author="Pims",
     author_email="tim@fewagainstmany.com",
     url="https://github.com/pims/torndb",
