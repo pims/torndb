@@ -24,7 +24,7 @@ distutils.core.setup(
     py_modules=["torndb"],
     author="Pims",
     author_email="tim@fewagainstmany.com",
-    url="https://github.com/pims/torndbpg",
+    url="https://github.com/pims/torndb",
     license="http://www.apache.org/licenses/LICENSE-2.0",
     description="A lightweight wrapper around Postgres. Fully compatible with the Torndb (MySQL) originally part of the Tornado framework.",
     )
