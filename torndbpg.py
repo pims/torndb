@@ -40,8 +40,8 @@ except ImportError:
     else:
         raise
 
-version = "0.1"
-version_info = (0, 1, 0, 0)
+version = "0.1.1"
+version_info = (0, 1, 1, 0)
 
 class Connection(object):
     """A lightweight wrapper around Postgres DB-API connections.
@@ -206,7 +206,6 @@ class Connection(object):
     insertmany = executemany_lastrowid
 
     def _ensure_connected(self):
-        return
 
         # Mysql by default closes client connections that are idle for
         # 8 hours, but the client library does not report this fact until
