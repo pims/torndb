@@ -153,9 +153,11 @@ class Connection(object):
     def execute_lastrowid(self, query, *parameters, **kwparameters):
         """Executes the given query, returning the lastrowid from the query."""
         cursor = self._cursor()
+        if not query.endswith("RETURNING id"):
+            query += "RETURNING id"
         try:
             self._execute(cursor, query, parameters, kwparameters)
-            return cursor.lastrowid
+            return cursor.fetchone()[0]
         finally:
             cursor.close()
 
